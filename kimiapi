@@ -1,0 +1,39 @@
+import requests
+import json
+import os
+
+# 通过Moonshot AI API生成文本，即kimi生成文本，文档：https://platform.moonshot.cn/docs/api-reference#%E8%AF%B7%E6%B1%82%E5%86%85%E5%AE%B9
+def kimi_chat():
+    MOONSHOT_API_KEY = os.getenv('MOONSHOT_API_KEY')
+
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {"sk-aezZMqwaF1eOSCm6dFRGDSH5wUwJR7LPuxJedjcDczPRJiBi"}',
+    }
+
+    data = {
+        "model": "moonshot-v1-8k",      # moonshot-v1-8k,moonshot-v1-32k,moonshot-v1-128k
+        "messages": [
+            # {"role": "system", "content": "你是 Kimi，由 Moonshot AI 提供的人工智能助手，你更擅长中文和英文的对话。你会为用户提供安全，有帮助，准确的回答。同时，你会拒绝一切涉及恐怖主义，种族歧视，黄色暴力等问题的回答。Moonshot AI 为专有名词，不可翻译成其他语言。"},
+            {"role": "system", "content": "假如你是一位中医学的专家，"
+                                          "你需要从文本中提取出有关{姓名、性别、年龄、症状、体征、舌象、脉象、方剂名称、中药名(不回复剂量)、西医病名、中医病名}的信息。"
+                                          "回复的格式严格按照json格式形如{ '姓名': 'X','性别': 'Y', '症状': [\n'Z1',\n'Z2'\n]}。其中X,Y,{Z1、Z2}分别是从文本中提取出的姓名，性别和症状相关的信息。"
+                                          "如果找不到这样的X,Y,Z,严格回复形如{ 姓名: 未提供}。"
+                                          "不需要回复分析过程，严格遵循回复格式"},
+            {"role": "user", "content":"请帮我从下面的中医医案中结构化提取医案内容{张某,男，36岁。平素嗜好饮酒，常饮又多饮,日久之后,酒湿内伤，脾胃失运，中气不和，痰从中生,影响中焦气机升降失调，而成心下痞满之证。伴见恶心呕吐,大便稀溏,每日三四次。虽经多方治疗却难以收功。舌质红,苔白，脉弦滑,此属痰气交阻而成痞,治宜半夏泻心汤。半夏12克、干姜6克、黄连6克、黄芩6克、党参9克、大枣7枚、炙甘草9克。服一剂,大便泻出白色黏液甚多，呕恶大减。再一剂,痞、利俱减。四剂尽而病愈。}"},
+
+        ],
+        "temperature": 0,
+    }
+
+    response = requests.post('https://api.moonshot.cn/v1/chat/completions', headers=headers, data=json.dumps(data))
+    response_json = response.json()
+    # 提取出你需要的部分
+    assistant_message = response_json['choices'][0]['message']['content']
+
+    return assistant_message
+
+
+# 调用函数
+if __name__ == '__main__':
+    print(kimi_chat())
